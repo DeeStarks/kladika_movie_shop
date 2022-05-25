@@ -5,6 +5,6 @@ def create_template(context: any = None, status: bool = True, message: str = '')
     default_context = {
         'status': status,
         'message': message,
-        'data': context if context else {}
+        'data': context
     }
     return default_context
