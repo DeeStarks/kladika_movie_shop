@@ -105,6 +105,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'utils.renderer.JSONResponseRenderer',
     ),
+    'EXCEPTION_HANDLER': 'utils.exception.custom_exception_handler'
 }
 
 
