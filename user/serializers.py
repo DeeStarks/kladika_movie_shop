@@ -20,17 +20,25 @@ class LoginSerializer(serializers.Serializer):
         trim_whitespace=False,
         write_only=True
     )
+    _is_staff = serializers.BooleanField(
+        write_only=True
+    )
 
     def validate(self, attrs):
         # Take username and password from request
         username = attrs.get('username')
         password = attrs.get('password')
+        is_staff = attrs.get('_is_staff')
 
         if username and password:
             user = authenticate(username=username, password=password)
             if not user:
                 # If we don't have a regular user, raise a ValidationError
                 msg = 'Access denied: wrong username or password.'
+                raise serializers.ValidationError(msg, code='authorization')
+
+            if is_staff and not user.is_staff:
+                msg = 'Access denied: user is not an admin.'
                 raise serializers.ValidationError(msg, code='authorization')
             attrs['user'] = user
             return attrs
@@ -39,8 +47,10 @@ class LoginSerializer(serializers.Serializer):
 
 class RegisterSerializer(serializers.Serializer):
     """
-    This serializer defines three fields for registration:
+    This serializer defines five fields for registration:
         * username
+        * first_name
+        * last_name
         * email
         * password
     """
@@ -48,6 +58,14 @@ class RegisterSerializer(serializers.Serializer):
         label="Username",
         max_length=30,
         min_length=3,
+        write_only=True
+    )
+    first_name = serializers.CharField(
+        label="First name",
+        write_only=True
+    )
+    last_name = serializers.CharField(
+        label="Last name",
         write_only=True
     )
     email = serializers.EmailField(
@@ -66,6 +84,8 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         username = attrs.get('username')
+        first_name = attrs.get("first_name")
+        last_name = attrs.get("last_name")
         email = attrs.get('email')
         password = attrs.get('password')
 
@@ -77,10 +97,24 @@ class RegisterSerializer(serializers.Serializer):
         msg = '"username", "email" and "password" are required.'
         raise serializers.ValidationError(msg, code='authorization')
 
-    def create(self, validated_data):
+    def create_user(self, validated_data):
         user = User.objects.create(
             username=validated_data.get('username'),
+            first_name=validated_data.get('first_name'),
+            last_name=validated_data.get('last_name'),
             email=validated_data.get('email'),
+        )
+        user.set_password(validated_data.get('password'))
+        user.save()
+        return user
+
+    def create_admin(self, validated_data):
+        user = User.objects.create(
+            username=validated_data.get('username'),
+            first_name=validated_data.get('first_name'),
+            last_name=validated_data.get('last_name'),
+            email=validated_data.get('email'),
+            is_staff=True
         )
         user.set_password(validated_data.get('password'))
         user.save()
@@ -92,4 +126,4 @@ class UserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'is_staff')
