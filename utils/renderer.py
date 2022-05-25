@@ -8,9 +8,11 @@ class JSONResponseRenderer(JSONRenderer):
 
     def render(self, data, status=200, accepted_media_type=None, renderer_context=None):
         message = data.get('message', '')
+        error = data.get('error', False)
         return json.dumps(
             create_template(
                 context=data.get("data"), 
+                status=False if error else True,
                 message=message
             )
         )

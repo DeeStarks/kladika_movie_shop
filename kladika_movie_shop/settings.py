@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-o0bmcow4qs*^ig+_x=70ynf-c95t@42h7-f$vyu)!al@zgt3f4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
 
     # Custom
-    "user",
+    'user',
 ]
 
 MIDDLEWARE = [
@@ -96,9 +96,15 @@ DATABASES = {
 }
 
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication'
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'DEFAULT_RENDERER_CLASSES': (
-        'kladika_movie_shop.renderer.JSONResponseRenderer',
-    )
+        'utils.renderer.JSONResponseRenderer',
+    ),
 }
 
 
