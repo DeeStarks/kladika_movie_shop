@@ -1,5 +1,7 @@
 # Movie Shop - API
-View API docs [here](https://documenter.getpostman.com/view/14444131/Uz59Mz6k).
+Online movie shop API.
+
+View API docs [here](https://documenter.getpostman.com/view/14444131/Uz59Mz6k). API is available at [https://kmovieshop.herokuapp.com/](https://kmovieshop.herokuapp.com/).
 
 ## Installation
 - First, have the following tools installed:
