@@ -1,6 +1,4 @@
-from rest_framework import permissions
-from rest_framework import views
-from rest_framework.decorators import permission_classes, authentication_classes
+from rest_framework import views, permissions
 from rest_framework.response import Response
 from django.contrib.auth import login
 from rest_framework.authtoken.models import Token
@@ -24,26 +22,24 @@ class LoginView(views.APIView):
             context={ 'request': self.request }
         )
 
-        try:
-            serializer.is_valid(raise_exception=True)
-        except Exception as e:
-            return Response(data={ 
-                'message': str(e),
-                'error': True
-            }, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            user = serializer.validated_data["user"]
+            login(request, user)
 
-        user = serializer.validated_data["user"]
-        login(request, user)
-
-        # Return a response containing the user's token
-        token = Token.objects.get_or_create(user=user)[0]
+            # Return a response containing the user's token
+            token = Token.objects.get_or_create(user=user)[0]
+            return Response(data={
+                'data' : {
+                    **serializers.UserSerializer(user).data,
+                    'token': token.key
+                },
+                'message': 'Admin logged in successfully.' if is_staff_request else 'User logged in successfully.',
+            })
         return Response(data={
-            'data' : {
-                **serializers.UserSerializer(user).data,
-                'token': token.key
-            },
-            'message': 'Admin logged in successfully.' if is_staff_request else 'User logged in successfully.',
-        })
+            'data': serializer.errors,
+            'message': 'Login failed.',
+            'error': True
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 class UserRegisterView(views.APIView):
     permission_classes = [permissions.AllowAny]
@@ -55,26 +51,25 @@ class UserRegisterView(views.APIView):
             context={ 'request': self.request }
         )
 
-        try:
-            serializer.is_valid(raise_exception=True)
-        except Exception as e:
-            return Response(
-                data={'message': str(e), 'error': True},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        user = serializer.create_user(serializer.validated_data)
-        login(request, user)
+        if serializer.is_valid():
+            user = serializer.create_user(serializer.validated_data)
+            login(request, user)
 
-        # Return a response containing the user's token
-        token = Token.objects.create(user=user)
+            # Return a response containing the user's token
+            token = Token.objects.create(user=user)
+            return Response(data={
+                'data': {
+                    **serializers.UserSerializer(user).data,
+                    'token': token.key,
+                },
+                'message': 'User was successfully registered'
+            })
         return Response(data={
-            'data': {
-                **serializers.UserSerializer(user).data,
-                'token': token.key,
-            },
-            'message': 'User was successfully registered'
-        })
+            'data': serializer.errors,
+            'message': 'User registration failed.',
+            'error': True
+        }, status=status.HTTP_400_BAD_REQUEST)
+        
 
 class AdminRegisterView(views.APIView):
     authentication_classes = [authentication.TokenAuthentication]
@@ -86,23 +81,22 @@ class AdminRegisterView(views.APIView):
             context={ 'request': self.request }
         )
 
-        try:
-            serializer.is_valid(raise_exception=True)
-        except Exception as e:
-            return Response(
-                data={'message': str(e), 'error': True},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        user = serializer.create_admin(serializer.validated_data)
-        login(request, user)
+        if serializer.is_valid():
+            user = serializer.create_admin(serializer.validated_data)
+            login(request, user)
 
-        # Return a response containing the user's token
-        token = Token.objects.create(user=user)
+            # Return a response containing the user's token
+            token = Token.objects.create(user=user)
+            return Response(data={
+                'data': {
+                    **serializers.UserSerializer(user).data,
+                    'token': token.key,
+                },
+                'message': 'Admin was successfully registered'
+            })
         return Response(data={
-            'data': {
-                **serializers.UserSerializer(user).data,
-                'token': token.key,
-            },
-            'message': 'Admin was successfully registered'
-        })
+            'data': serializer.errors,
+            'message': 'Admin registration failed.',
+            'error': True
+        }, status=status.HTTP_400_BAD_REQUEST)
+        

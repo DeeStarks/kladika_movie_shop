@@ -90,8 +90,11 @@ class RegisterSerializer(serializers.Serializer):
         password = attrs.get('password')
 
         if username and email and password:
-            if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+            if User.objects.filter(username=username).exists():
                 msg = 'Username already exists.'
+                raise serializers.ValidationError(msg, code='authorization')
+            if User.objects.filter(email=email).exists():
+                msg = 'Email already exists.'
                 raise serializers.ValidationError(msg, code='authorization')
             return attrs
         msg = '"username", "email" and "password" are required.'
