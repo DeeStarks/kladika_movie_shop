@@ -19,6 +19,11 @@ environ.Env.read_env(env_file=Path(__file__).parent / '../.env')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Fixtures for initial data auto-import
+FIXTURE_DIRS = [
+    BASE_DIR / 'fixtures',
+]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -48,7 +53,8 @@ INSTALLED_APPS = [
 
     # Custom
     'authentication',
-    'movie'
+    'movie',
+    'rental'
 ]
 
 MIDDLEWARE = [

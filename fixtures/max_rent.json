@@ -1,0 +1,9 @@
+[
+  {
+    "model": "rental.MaxRent",
+    "pk": 1,
+    "fields": {
+        "number": 10
+    }
+  }
+]

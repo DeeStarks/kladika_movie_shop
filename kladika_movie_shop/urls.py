@@ -20,4 +20,5 @@ urlpatterns = [
     path('uiadmin/', admin.site.urls),
     path('', include('authentication.urls')),
     path('', include('movie.urls')),
+    path('', include('rental.urls')),
 ]
